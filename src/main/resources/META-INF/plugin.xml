@@ -1,0 +1,18 @@
+<idea-plugin>
+    <id>io.github.aveenstra.run-anything</id>
+    <name>RunAnything</name>
+<!--    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>-->
+    <vendor>AVeenstra</vendor>
+
+    <description>Run anything as a run configuration. This plugin adds an empty run configuration that can call any system command.</description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="io.github.aveenstra.run_anything.RunAnythingConfigurationType"/>
+    </extensions>
+
+    <actions/>
+</idea-plugin>
