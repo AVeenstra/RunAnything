@@ -4,7 +4,7 @@ It adds a Run Configuration that can run/execute any command/executable.
 There is support for setting environment variables and the working directory.
 All but the environment variables field has support for macros.
 
-### Example
+## Example
 
 Example of the Run Configuration:
 
@@ -14,11 +14,11 @@ Running this configuration provides the following result:
 
 ![Running](.github/Running.png)
 
-### Compiling
+## Compiling
 Use gradle to build the plugin:
 
 ```
-./gradlew buildPlugin
+./gradlew assemble
 ```
 
 The output should be in `build/distributions`.
