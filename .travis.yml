@@ -1,3 +1,13 @@
 language: java
 jdk: openjdk11
-script: ./gradlew assemble
+script: "./gradlew assemble"
+
+deploy:
+  provider: releases
+  edge: true
+  token:
+    secure: JH+bKhvvDPrz0uuJhrj+tZXIOdlz1eBHK6guoMXKs8EaJ+0oEwryyuVTQtejrhZY7/3VljCnPAjnP5UXrEO5Ma3CLpQ7q/i8sRxfP+0juWktr+KKNRUa2PGi0UlFXjSoqgeHzW1h40iwQ2a/r77ogrkkP3Wvb0e03A1geCL+SAzS7xJhHD5rUbaGa+hkDXfwmgGQLR3ceCqmnfgGG3Cit+4jA0uNb6Oj0bv5OUru+KiDM3qxrT1aBLODkkXWJP6vlyQD5yB26nMlRFqbSaUXzI0orht0pVU6aMc42ZErIrc1vapk3OKzBm6yj9xVEJozYmCKEdRDJjAfh33hHCMbArCQYHhVbi0yDCnUMs3WzSnzm8IwL5NpQ3nf+JKK57rRy/V6D9MNNI7Leq+jqioHZ7JzxMWaroMCueZw7s20r9EhGSPKtEq266HPLcvJgFdjMqXERou+xKVS+5Zfz/wKoBjxWckf7TwLfcepQ1X7zNS36+3I23yGHH6/6SSqGWVSCo56kUXugKXQQkLoThYeHqfL3LcpuScE6pNAqc278sJgsFBcYgOlM2EkGP5BeYYhPIyFa1Lr/R2HRX1nEaNhu0OOV7KOZxb6I774cqAMwpuH/Aj05qKpmabLh2uyvA2/jUeCj0WaxuW/b7WXL8ogAIsB5XWDMSVQBfEo033bwDw=
+  file: $CI_HOME/build/distributions/run-anything*.zip
+  on:
+    tags: true
+  draft: true
