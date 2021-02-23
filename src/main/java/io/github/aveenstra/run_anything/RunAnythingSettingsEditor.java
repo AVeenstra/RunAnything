@@ -62,7 +62,7 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
     private void createUIComponents() {
         var command_field_filter = new FileChooserDescriptor(true, false, false, true, false, false);
         commandField = new TextFieldWithBrowseButton();
-        commandField.addBrowseFolderListener("Select an Executable", "", null, command_field_filter);
+        commandField.addBrowseFolderListener("Select a Program", "", null, command_field_filter);
         MacrosDialog.addMacroSupport((ExtendableTextField) commandField.getTextField(), MacrosDialog.Filters.ALL, () -> false);
 
         argumentsField = new ExpandableTextField();

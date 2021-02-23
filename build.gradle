@@ -1,10 +1,9 @@
 plugins {
-    id 'java'
-    id 'org.jetbrains.intellij' version '0.6.5'
+    id "org.jetbrains.intellij" version "0.7.2"
 }
 
 group 'io.github.aveenstra'
-version '1.1'
+version '1.2'
 
 repositories {
     mavenCentral()
@@ -17,6 +16,7 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+      <p><b>1.2</b> Rename "Command" field to "Program"</p>
       <p><b>1.1</b> Support new version of Intellij</p>
       <p><b>1.0</b> Initial version</p>
       """

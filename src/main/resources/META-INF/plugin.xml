@@ -1,7 +1,6 @@
 <idea-plugin>
     <id>io.github.aveenstra.run-anything</id>
     <name>RunAnything</name>
-<!--    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>-->
     <vendor>AVeenstra</vendor>
 
     <description>Run anything as a run configuration. This plugin adds an empty run configuration that can call any system command.</description>
