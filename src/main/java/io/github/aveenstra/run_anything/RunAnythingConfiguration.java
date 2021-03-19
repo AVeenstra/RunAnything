@@ -72,7 +72,7 @@ public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingCo
                         .withParameters(ParametersListUtil.parse(ProgramParametersUtil.expandPathAndMacros(options.getArguments(), module, project)))
                         .withEnvironment(options.getEnvironmentVariables())
                         .withWorkDirectory(cwd)
-                        .withParentEnvironmentType(options.getIsPassParentEnvs() ? GeneralCommandLine.ParentEnvironmentType.SYSTEM : GeneralCommandLine.ParentEnvironmentType.NONE);
+                        .withParentEnvironmentType(options.getIsPassParentEnvs() ? GeneralCommandLine.ParentEnvironmentType.CONSOLE : GeneralCommandLine.ParentEnvironmentType.NONE);
 
                 OSProcessHandler processHandler = ProcessHandlerFactory.getInstance().createColoredProcessHandler(commandLine);
                 ProcessTerminatedListener.attach(processHandler);

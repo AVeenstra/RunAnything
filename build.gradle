@@ -16,7 +16,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
-      <p><b>1.2</b> Rename "Command" field to "Program"</p>
+      <p><b>1.2</b><ul>
+        <li>Rename "Command" field to "Program"</li>
+        <li>Fix environment variables for Mac</li>
+      </ul></p>
       <p><b>1.1</b> Support new version of Intellij</p>
       <p><b>1.0</b> Initial version</p>
       """
