@@ -2,7 +2,8 @@
 This repository provides the source of an JetBrains IDE plugin.
 It adds a Run Configuration that can run/execute any command/executable.
 There is support for setting environment variables and the working directory.
-All but the environment variables field has support for macros.
+You can also provide program input to save you the hassle of typing in the console.
+All but the environment variables and the program input fields have support for macros.
 
 [This plugin on the marketplace](https://plugins.jetbrains.com/plugin/16128-runanything)
 
@@ -10,11 +11,19 @@ All but the environment variables field has support for macros.
 
 Example of the Run Configuration:
 
-![Run Configuration](.github/RunConfiguration.png)
+![Run Configuration](.github/JavaConfiguration.png)
 
 Running this configuration provides the following result:
 
-![Running](.github/Running.png)
+![Running](.github/JavaRun.png)
+
+Run shell scripts without creating any extra files like so:
+
+![Run Configuration](.github/FortuneConfiguration.png)
+
+Which will result in the following run:
+
+![Running](.github/FortuneRun.png)
 
 ## Compiling
 Use gradle to build the plugin:

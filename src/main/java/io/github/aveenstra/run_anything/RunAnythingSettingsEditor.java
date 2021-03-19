@@ -22,6 +22,8 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.fields.ExpandableTextField;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +37,9 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
     private ExpandableTextField argumentsField;
     private EnvironmentVariablesComponent environmentField;
     private TextFieldWithBrowseButton workingDirectoryField;
+    private JBCheckBox enableInputCheckBox;
+    private JBCheckBox closeInputCheckBox;
+    private JBTextArea inputTextComponent;
 
     @Override
     protected void resetEditorFrom(@NotNull RunAnythingConfiguration s) {
@@ -43,6 +48,11 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
         argumentsField.setText(options.getArguments());
         environmentField.setEnvData(options.getEnvironmentVariablesData());
         workingDirectoryField.setText(options.getWorkingDirectory());
+        var inputEnabled = options.getInputEnabled();
+        enableInputCheckBox.setSelected(inputEnabled);
+        closeInputCheckBox.setSelected(options.getInputClose());
+        inputTextComponent.setText(options.getInputText());
+        setInputFieldsEnabled(inputEnabled);
     }
 
     @Override
@@ -52,11 +62,19 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
         options.setArguments(argumentsField.getText());
         options.setEnvironmentVariablesData(environmentField.getEnvData());
         options.setWorkingDirectory(workingDirectoryField.getText());
+        options.setInputEnabled(enableInputCheckBox.isSelected());
+        options.setInputClose(closeInputCheckBox.isSelected());
+        options.setInputText(inputTextComponent.getText());
     }
 
     @Override
     protected @NotNull JComponent createEditor() {
         return topPanel;
+    }
+
+    private void setInputFieldsEnabled(boolean enabled) {
+        closeInputCheckBox.setEnabled(enabled);
+        inputTextComponent.setEnabled(enabled);
     }
 
     private void createUIComponents() {
@@ -72,5 +90,12 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
         workingDirectoryField = new TextFieldWithBrowseButton();
         workingDirectoryField.addBrowseFolderListener("Select a Directory", "", null, working_directory_field_filter);
         MacrosDialog.addMacroSupport((ExtendableTextField) workingDirectoryField.getTextField(), MacrosDialog.Filters.ALL, () -> false);
+
+        enableInputCheckBox = new JBCheckBox();
+        enableInputCheckBox.addActionListener(actionEvent -> setInputFieldsEnabled(enableInputCheckBox.isSelected()));
+
+        inputTextComponent = new JBTextArea(5, 80);
+        inputTextComponent.setAutoscrolls(true);
+        inputTextComponent.setLineWrap(true);
     }
 }

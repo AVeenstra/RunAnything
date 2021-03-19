@@ -19,11 +19,12 @@ package io.github.aveenstra.run_anything;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
-import com.intellij.execution.process.OSProcessHandler;
-import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.process.ProcessHandlerFactory;
-import com.intellij.execution.process.ProcessTerminatedListener;
+import com.intellij.execution.process.*;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.ui.RunContentManager;
 import com.intellij.execution.util.ProgramParametersUtil;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.options.SettingsEditor;
@@ -31,6 +32,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.execution.ParametersListUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
 
 public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingConfigurationOptions> {
     protected RunAnythingConfiguration(Project project, ConfigurationFactory factory, String name) {
@@ -55,26 +58,62 @@ public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingCo
 
     @Override
     public @Nullable RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
+        final var options = getOptions();
+        final var project = environment.getProject();
+        final var dataContext = environment.getDataContext();
+        final var module = dataContext != null ? dataContext.getData(LangDataKeys.MODULE) : null;
+        final var inputText = options.getInputText();
+        final var inputClose = options.getInputClose();
+        var cwd_option = options.getWorkingDirectory();
+        final var cwd = !cwd_option.isEmpty() ? ProgramParametersUtil.expandPathAndMacros(cwd_option, module, project) : environment.getProject().getBasePath();
+
         return new CommandLineState(environment) {
             @NotNull
             @Override
             protected ProcessHandler startProcess() throws ExecutionException {
-                var options = getOptions();
-                var project = environment.getProject();
-                var dataContext = environment.getDataContext();
-                var module = dataContext != null ? dataContext.getData(LangDataKeys.MODULE) : null;
-
-                var cwd = options.getWorkingDirectory();
-                if (!cwd.isEmpty()) cwd = ProgramParametersUtil.expandPathAndMacros(cwd, module, project);
-                else cwd = environment.getProject().getBasePath();
-
                 GeneralCommandLine commandLine = new GeneralCommandLine(ProgramParametersUtil.expandPathAndMacros(options.getCommand(), module, project))
                         .withParameters(ParametersListUtil.parse(ProgramParametersUtil.expandPathAndMacros(options.getArguments(), module, project)))
                         .withEnvironment(options.getEnvironmentVariables())
                         .withWorkDirectory(cwd)
                         .withParentEnvironmentType(options.getIsPassParentEnvs() ? GeneralCommandLine.ParentEnvironmentType.CONSOLE : GeneralCommandLine.ParentEnvironmentType.NONE);
 
-                OSProcessHandler processHandler = ProcessHandlerFactory.getInstance().createColoredProcessHandler(commandLine);
+                final var processHandler = new KillableColoredProcessHandler(commandLine);
+
+                if (options.getInputEnabled()) {
+                    final var writer = processHandler.getProcess().getOutputStream();
+                    processHandler.addProcessListener(new ProcessAdapter() {
+                        @Override
+                        public void startNotified(@NotNull ProcessEvent event) {
+                            RunContentDescriptor contentDescriptor = RunContentManager.getInstance(getEnvironment().getProject())
+                                    .findContentDescriptor(getEnvironment().getExecutor(), processHandler);
+
+                            if (contentDescriptor != null && contentDescriptor.getExecutionConsole() instanceof ConsoleView) {
+                                ((ConsoleView) contentDescriptor.getExecutionConsole()).print(inputText, ConsoleViewContentType.LOG_INFO_OUTPUT);
+                            }
+
+                            try {
+                                writer.write(inputText.getBytes());
+                                writer.flush();
+                                if (inputClose) {
+                                    writer.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            if (!inputClose)
+                                try {
+                                    writer.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                        }
+                    });
+                }
+
                 ProcessTerminatedListener.attach(processHandler);
                 return processHandler;
             }

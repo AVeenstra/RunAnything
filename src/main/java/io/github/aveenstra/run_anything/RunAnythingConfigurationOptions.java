@@ -32,6 +32,9 @@ public class RunAnythingConfigurationOptions extends RunConfigurationOptions {
     private final StoredProperty<String> workingDirectory = string("").provideDelegate(this, "workingDirectory");
     private final StoredProperty<Map<String, String>> environmentVariables = map();
     private final StoredProperty<Boolean> isPassParentEnvs = property(true).provideDelegate(this, "isPassParentEnvs");
+    private final StoredProperty<Boolean> inputEnabled = property(false).provideDelegate(this, "inputEnabled");
+    private final StoredProperty<String> inputText = string("").provideDelegate(this, "inputText");
+    private final StoredProperty<Boolean> inputClose = property(true).provideDelegate(this, "inputClose");
 
     public RunAnythingConfigurationOptions() {
         environmentVariables.setName("environmentVariables");
@@ -106,6 +109,31 @@ public class RunAnythingConfigurationOptions extends RunConfigurationOptions {
 
     public void setWorkingDirectory(@NotNull String newWorkingDirectory) {
         workingDirectory.setValue(this, newWorkingDirectory);
+    }
+
+    public boolean getInputEnabled() {
+        return inputEnabled.getValue(this);
+    }
+
+    public void setInputEnabled(boolean enabled) {
+        inputEnabled.setValue(this, enabled);
+    }
+
+    public @NotNull String getInputText() {
+        var result = inputText.getValue(this);
+        return result == null ? "" : result;
+    }
+
+    public void setInputText(@NotNull String newInputText) {
+        inputText.setValue(this, newInputText);
+    }
+
+    public boolean getInputClose() {
+        return inputClose.getValue(this);
+    }
+
+    public void setInputClose(boolean close) {
+        inputClose.setValue(this, close);
     }
 
     public void validate_all() throws RuntimeConfigurationException {

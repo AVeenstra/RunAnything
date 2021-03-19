@@ -3,7 +3,12 @@
     <name>RunAnything</name>
     <vendor>AVeenstra</vendor>
 
-    <description>Run anything as a run configuration. This plugin adds an empty run configuration that can call any system command.</description>
+    <description>
+        This plugin adds a Run Configuration that can run/execute any command/executable.
+        There is support for setting environment variables and the working directory.
+        You can also provide program input to save you the hassle of typing in the console.
+        All but the environment variables and the program input fields have support for macros.
+    </description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
