@@ -25,6 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
+/**
+ * This class represents the configuration type of the plugin.
+ */
 public class RunAnythingConfigurationType implements ConfigurationType {
 
     @Override

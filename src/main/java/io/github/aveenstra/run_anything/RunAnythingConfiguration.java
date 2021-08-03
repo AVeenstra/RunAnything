@@ -34,7 +34,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
+/**
+ * This class contains the method creating the process in {@link RunAnythingConfiguration#getState()}.
+ */
 public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingConfigurationOptions> {
     protected RunAnythingConfiguration(Project project, ConfigurationFactory factory, String name) {
         super(project, factory, name);
@@ -79,44 +83,58 @@ public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingCo
 
                 final var processHandler = new KillableColoredProcessHandler(commandLine);
 
-                if (options.getInputEnabled()) {
-                    final var writer = processHandler.getProcess().getOutputStream();
-                    processHandler.addProcessListener(new ProcessAdapter() {
-                        @Override
-                        public void startNotified(@NotNull ProcessEvent event) {
-                            RunContentDescriptor contentDescriptor = RunContentManager.getInstance(getEnvironment().getProject())
-                                    .findContentDescriptor(getEnvironment().getExecutor(), processHandler);
-
-                            if (contentDescriptor != null && contentDescriptor.getExecutionConsole() instanceof ConsoleView) {
-                                ((ConsoleView) contentDescriptor.getExecutionConsole()).print(inputText, ConsoleViewContentType.LOG_INFO_OUTPUT);
-                            }
-
-                            try {
-                                writer.write(inputText.getBytes());
-                                writer.flush();
-                                if (inputClose) {
-                                    writer.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void processTerminated(@NotNull ProcessEvent event) {
-                            if (!inputClose)
-                                try {
-                                    writer.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                        }
-                    });
-                }
+                if (options.getInputEnabled())
+                    processHandler.addProcessListener(new InputWriterProcessAdapter(this, processHandler, inputText, inputClose));
 
                 ProcessTerminatedListener.attach(processHandler);
                 return processHandler;
             }
         };
+    }
+
+    private static class InputWriterProcessAdapter extends ProcessAdapter {
+        private final CommandLineState parentState;
+        private final OSProcessHandler processHandler;
+        private final OutputStream writer;
+        private final String inputText;
+        private final boolean inputClose;
+
+        private InputWriterProcessAdapter(CommandLineState parentState, OSProcessHandler processHandler, String inputText, boolean inputClose) {
+            this.parentState = parentState;
+            this.processHandler = processHandler;
+            this.writer = processHandler.getProcess().getOutputStream();
+            this.inputText = inputText;
+            this.inputClose = inputClose;
+        }
+
+        @Override
+        public void startNotified(@NotNull ProcessEvent event) {
+            RunContentDescriptor contentDescriptor = RunContentManager.getInstance(parentState.getEnvironment().getProject())
+                    .findContentDescriptor(parentState.getEnvironment().getExecutor(), processHandler);
+
+            if (contentDescriptor != null && contentDescriptor.getExecutionConsole() instanceof ConsoleView) {
+                ((ConsoleView) contentDescriptor.getExecutionConsole()).print(inputText, ConsoleViewContentType.LOG_INFO_OUTPUT);
+            }
+
+            try {
+                writer.write(inputText.getBytes());
+                writer.flush();
+                if (inputClose) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void processTerminated(@NotNull ProcessEvent event) {
+            if (!inputClose)
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
     }
 }

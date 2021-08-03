@@ -81,15 +81,15 @@ public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfigu
         var command_field_filter = new FileChooserDescriptor(true, false, false, true, false, false);
         commandField = new TextFieldWithBrowseButton();
         commandField.addBrowseFolderListener("Select a Program", "", null, command_field_filter);
-        MacrosDialog.addMacroSupport((ExtendableTextField) commandField.getTextField(), MacrosDialog.Filters.ALL, () -> false);
+        MacrosDialog.addTextFieldExtension((ExtendableTextField) commandField.getTextField());
 
         argumentsField = new ExpandableTextField();
-        MacrosDialog.addMacroSupport(argumentsField, MacrosDialog.Filters.ALL, () -> false);
+        MacrosDialog.addTextFieldExtension(argumentsField);
 
         var working_directory_field_filter = new FileChooserDescriptor(false, true, false, false, false, false);
         workingDirectoryField = new TextFieldWithBrowseButton();
         workingDirectoryField.addBrowseFolderListener("Select a Directory", "", null, working_directory_field_filter);
-        MacrosDialog.addMacroSupport((ExtendableTextField) workingDirectoryField.getTextField(), MacrosDialog.Filters.ALL, () -> false);
+        MacrosDialog.addTextFieldExtension((ExtendableTextField) workingDirectoryField.getTextField());
 
         enableInputCheckBox = new JBCheckBox();
         enableInputCheckBox.addActionListener(actionEvent -> setInputFieldsEnabled(enableInputCheckBox.isSelected()));
