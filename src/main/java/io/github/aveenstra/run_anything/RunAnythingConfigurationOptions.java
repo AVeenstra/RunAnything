@@ -142,7 +142,6 @@ public class RunAnythingConfigurationOptions extends RunConfigurationOptions {
             validateEnvironmentVariables(getEnvironmentVariables());
         } catch (ConfigurationException e) {
             var new_e = new RuntimeConfigurationException(e.getMessage(), e.getTitle());
-            new_e.setQuickFix(e.getQuickFix());
             new_e.setOriginator(e.getOriginator());
             new_e.setStackTrace(e.getStackTrace());
             throw new_e;
