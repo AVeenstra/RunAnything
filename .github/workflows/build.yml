@@ -2,8 +2,8 @@ name: Build the release
 
 on:
   push:
-    tags-ignore:
-      - '**'
+    branches: '**'
+    tags-ignore: '**'
 
 permissions:
   contents: read
