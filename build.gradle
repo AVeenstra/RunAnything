@@ -1,18 +1,23 @@
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 plugins {
     id('java')
-    id("org.jetbrains.intellij") version "1.2.0"
+    id("org.jetbrains.intellij") version "1.5.3"
 }
 
 group 'io.github.aveenstra'
-version '1.7'
+version '1.8'
 
 repositories {
     mavenCentral()
 }
 
+intellij {
+    version = 'LATEST-EAP-SNAPSHOT'
+}
+
 patchPluginXml {
     changeNotes = """
+      <p><b>1.8</b> Support new version of Intellij</p>
       <p><b>1.7</b> Remove use of deprecated method</p>
       <p><b>1.6</b> Support new version of Intellij</p>
       <p><b>1.5</b> Support new version of Intellij</p>
@@ -25,4 +30,8 @@ patchPluginXml {
       <p><b>1.1</b> Support new version of Intellij</p>
       <p><b>1.0</b> Initial version</p>
       """
+}
+
+publishPlugin {
+    token = System.getenv("JETBRAINS_TOKEN")
 }
