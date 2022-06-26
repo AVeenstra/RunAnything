@@ -1,14 +1,20 @@
-<ul>
-<li><b>1.8</b> Support new version of Intellij</li>
-<li><b>1.7</b> Remove use of deprecated method</li>
-<li><b>1.6</b> Support new version of Intellij</li>
-<li><b>1.5</b> Support new version of Intellij</li>
-<li><b>1.4</b> Support new version of Intellij</li>
-<li><b>1.3</b> Add program input field</li>
-<li><b>1.2</b><ul>
-<li>Rename "Command" field to "Program"</li>
-<li>Fix environment variables for Mac</li>
-</ul></li>
-<li><b>1.1</b> Support new version of Intellij</li>
-<li><b>1.0</b> Initial version</li>
-</ul>
+<dl>
+<dt>1.8</dt>
+<dd>Support new version of Intellij</dd>
+<dt>1.7</dt>
+<dd>Remove use of deprecated method</dd>
+<dt>1.6</dt>
+<dd>Support new version of Intellij</dd>
+<dt>1.5</dt>
+<dd>Support new version of Intellij</dd>
+<dt>1.4</dt>
+<dd>Support new version of Intellij</dd>
+<dt>1.3</dt>
+<dd>Add program input field</dd>
+<dt>1.2</dt>
+<dd>Fix environment variables for Mac</dd>
+<dt>1.1</dt>
+<dd>Support new version of Intellij</dd>
+<dt>1.0</dt>
+<dd>Initial version</dd>
+</dl>
