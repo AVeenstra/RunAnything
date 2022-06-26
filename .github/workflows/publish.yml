@@ -36,17 +36,21 @@ jobs:
 
       - name: Push the CHANGES.md
         run: |
-          git config --global user.name 'Your Name'
-          git config --global user.email 'your-username@users.noreply.github.com'
+          git config --global core.pager 'cat'
+          git config --global user.name 'GitHubActions'
+          git config --global user.email 'GitHubActions@users.noreply.github.com'
+          git diff
           git add CHANGES.md
           git commit -m "Update CHANGES.md for v${{ inputs.VERSION }}"
           git tag -a "${{ inputs.VERSION }}" -m "${{ inputs.CHANGE_NOTES }}"
-          git push origin --tags
+          git push origin --follow-tags
 
       - name: Publish GitHub release
         uses: actions/github-script@v6.1.0
         with:
           script: |
+            console.log('context =', context)
+            
             const fs = require('fs');
             
             const owner = context.repo.owner;
@@ -58,24 +62,26 @@ jobs:
               body: '${{ inputs.CHANGE_NOTES }}'
             });
             
-            console.log(releaseResponse);
+            console.log('releaseResponse =', releaseResponse);
             
             const name = 'RunAnything-${{ inputs.VERSION }}.zip';
             const filename = './build/distributions/' + name;
             
-            console.log(filename);
+            console.log('filename =', filename);
             
             const contentLength = fs.statSync(filename).size;
             
             const headers = { 'content-type': 'application/zip', 'content-length': contentLength };
             
-            console.log(headers);
+            console.log('headers =', headers);
             
             const data = fs.readFileSync(filename);
             
-            await github.rest.octokit.rest.repos.uploadReleaseAsset({
+            const assetResponse = await github.rest.repos.uploadReleaseAsset({
               headers,
               owner, repo,
               release_id: releaseResponse.data.id,
               name, data
             });
+            
+            console.log('assetResponse =', assetResponse);
