@@ -1,34 +1,81 @@
 name: Publish the release
 
 on:
-  push:
-    tags:
-      - '**'
-
-permissions:
-  contents: read
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: 'Version'
+        required: true
+      CHANGE_NOTES:
+        description: 'Change notes'
+        required: true
+        default: 'Support new version of Intellij'
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
 
-    - name: Build with Gradle
-      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
-      with:
-        arguments: build
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.2.1
 
-    - name: Publish the plugin
-      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
-      env: 
-        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
-      with:
-        arguments: publishPlugin
+      - name: Build and publish the plugin
+        env:
+          JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
+          VERSION: ${{ inputs.VERSION }}
+          CHANGE_NOTES: ${{ inputs.CHANGE_NOTES }}
+        run: ./gradlew build -x publishPlugin
+
+      - name: Push the CHANGES.md
+        run: |
+          git config --global user.name 'Your Name'
+          git config --global user.email 'your-username@users.noreply.github.com'
+          git add CHANGES.md
+          git commit -m "Update CHANGES.md for v${{ inputs.VERSION }}"
+          git tag -a "${{ inputs.VERSION }}" -m "${{ inputs.CHANGE_NOTES }}"
+          git push origin --tags
+
+      - name: Publish GitHub release
+        uses: actions/github-script@v6.1.0
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            const releaseResponse = await github.rest.repos.createRelease({
+              owner, repo,
+              tag_name: '${{ inputs.VERSION }}',
+              body: '${{ inputs.CHANGE_NOTES }}'
+            });
+            
+            console.log(releaseResponse);
+            
+            const name = 'RunAnything-${{ inputs.VERSION }}.zip';
+            const filename = './build/distributions/' + name;
+            
+            console.log(filename);
+            
+            const contentLength = fs.statSync(filename).size;
+            
+            const headers = { 'content-type': 'application/zip', 'content-length': contentLength };
+            
+            console.log(headers);
+            
+            const data = fs.readFileSync(filename);
+            
+            await github.rest.octokit.rest.repos.uploadReleaseAsset({
+              headers,
+              owner, repo,
+              release_id: releaseResponse.data.id,
+              name, data
+            });
