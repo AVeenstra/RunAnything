@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021 A Veenstra
+ *    Copyright 2022 A Veenstra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,128 +13,124 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package io.github.aveenstra.runAnything
 
-package io.github.aveenstra.run_anything;
-
-import com.intellij.execution.ExecutionException;
-import com.intellij.execution.Executor;
-import com.intellij.execution.configurations.*;
-import com.intellij.execution.process.*;
-import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.execution.ui.RunContentManager;
-import com.intellij.execution.util.ProgramParametersUtil;
-import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.project.Project;
-import com.intellij.util.execution.ParametersListUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.io.OutputStream;
+import com.intellij.execution.ExecutionException
+import com.intellij.execution.Executor
+import com.intellij.execution.configurations.*
+import com.intellij.execution.configurations.GeneralCommandLine.ParentEnvironmentType
+import com.intellij.execution.process.*
+import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.execution.ui.RunContentManager
+import com.intellij.execution.util.ProgramParametersUtil
+import com.intellij.openapi.actionSystem.LangDataKeys
+import com.intellij.openapi.options.SettingsEditor
+import com.intellij.openapi.project.Project
+import com.intellij.util.execution.ParametersListUtil
+import java.io.IOException
+import java.io.OutputStream
 
 /**
- * This class contains the method creating the process in {@link RunAnythingConfiguration#getState()}.
+ * This class contains the method creating the process in [RunAnythingConfiguration.getState].
  */
-public class RunAnythingConfiguration extends RunConfigurationBase<RunAnythingConfigurationOptions> {
-    protected RunAnythingConfiguration(Project project, ConfigurationFactory factory, String name) {
-        super(project, factory, name);
+class RunAnythingConfiguration(project: Project?, factory: ConfigurationFactory?, name: String?) :
+    RunConfigurationBase<RunAnythingConfigurationOptions?>(project!!, factory, name) {
+
+    public override fun getOptions(): RunAnythingConfigurationOptions {
+        return super.getOptions() as RunAnythingConfigurationOptions
     }
 
-    @NotNull
-    @Override
-    protected RunAnythingConfigurationOptions getOptions() {
-        return (RunAnythingConfigurationOptions) super.getOptions();
+    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration?> {
+        return RunAnythingSettingsEditor()
     }
 
-    @Override
-    public @NotNull SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-        return new RunAnythingSettingsEditor();
+    @Throws(RuntimeConfigurationException::class)
+    override fun checkConfiguration() {
+        options.validateAll()
     }
 
-    @Override
-    public void checkConfiguration() throws RuntimeConfigurationException {
-        getOptions().validate_all();
-    }
+    override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState {
+        val options = options
+        val project = environment.project
+        val module = environment.dataContext?.getData(LangDataKeys.MODULE)
 
-    @Override
-    public @Nullable RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
-        final var options = getOptions();
-        final var project = environment.getProject();
-        final var dataContext = environment.getDataContext();
-        final var module = dataContext != null ? dataContext.getData(LangDataKeys.MODULE) : null;
-        final var inputText = options.getInputText();
-        final var inputClose = options.getInputClose();
-        var cwd_option = options.getWorkingDirectory();
-        final var cwd = !cwd_option.isEmpty() ? ProgramParametersUtil.expandPathAndMacros(cwd_option, module, project) : environment.getProject().getBasePath();
-
-        return new CommandLineState(environment) {
-            @NotNull
-            @Override
-            protected ProcessHandler startProcess() throws ExecutionException {
-                GeneralCommandLine commandLine = new GeneralCommandLine(ProgramParametersUtil.expandPathAndMacros(options.getCommand(), module, project))
-                        .withParameters(ParametersListUtil.parse(ProgramParametersUtil.expandPathAndMacros(options.getArguments(), module, project)))
-                        .withEnvironment(options.getEnvironmentVariables())
-                        .withWorkDirectory(cwd)
-                        .withParentEnvironmentType(options.getIsPassParentEnvs() ? GeneralCommandLine.ParentEnvironmentType.CONSOLE : GeneralCommandLine.ParentEnvironmentType.NONE);
-
-                final var processHandler = new KillableColoredProcessHandler(commandLine);
-
-                if (options.getInputEnabled())
-                    processHandler.addProcessListener(new InputWriterProcessAdapter(this, processHandler, inputText, inputClose));
-
-                ProcessTerminatedListener.attach(processHandler);
-                return processHandler;
-            }
-        };
-    }
-
-    private static class InputWriterProcessAdapter extends ProcessAdapter {
-        private final CommandLineState parentState;
-        private final OSProcessHandler processHandler;
-        private final OutputStream writer;
-        private final String inputText;
-        private final boolean inputClose;
-
-        private InputWriterProcessAdapter(CommandLineState parentState, OSProcessHandler processHandler, String inputText, boolean inputClose) {
-            this.parentState = parentState;
-            this.processHandler = processHandler;
-            this.writer = processHandler.getProcess().getOutputStream();
-            this.inputText = inputText;
-            this.inputClose = inputClose;
+        val cwd = if (!options.workingDirectory.isNullOrEmpty()) {
+            ProgramParametersUtil.expandPathAndMacros(options.workingDirectory, module, project)
+        } else {
+            environment.project.basePath!!
         }
 
-        @Override
-        public void startNotified(@NotNull ProcessEvent event) {
-            RunContentDescriptor contentDescriptor = RunContentManager.getInstance(parentState.getEnvironment().getProject())
-                    .findContentDescriptor(parentState.getEnvironment().getExecutor(), processHandler);
+        return object : CommandLineState(environment) {
+            @Throws(ExecutionException::class)
+            override fun startProcess(): ProcessHandler {
+                val command = ProgramParametersUtil.expandPathAndMacros(options.command, module, project)
+                val parametersText = ProgramParametersUtil.expandPathAndMacros(options.arguments, module, project)
+                val parameters = ParametersListUtil.parse(parametersText)
 
-            if (contentDescriptor != null && contentDescriptor.getExecutionConsole() instanceof ConsoleView) {
-                ((ConsoleView) contentDescriptor.getExecutionConsole()).print(inputText, ConsoleViewContentType.LOG_INFO_OUTPUT);
+                val parentEnvironment = if (options.isPassParentEnvs) {
+                    ParentEnvironmentType.CONSOLE
+                } else {
+                    ParentEnvironmentType.NONE
+                }
+
+                val commandLine = GeneralCommandLine(command)
+                    .withParameters(parameters)
+                    .withWorkDirectory(cwd)
+                    .withEnvironment(options.environmentVariables)
+                    .withParentEnvironmentType(parentEnvironment)
+
+                val processHandler = KillableColoredProcessHandler(commandLine)
+
+                if (options.inputEnabled) {
+                    val inputText = options.inputText ?: ""
+                    val inputClose = options.inputClose
+
+                    val inputWriter = InputWriterProcessAdapter(this, processHandler, inputText, inputClose)
+                    processHandler.addProcessListener(inputWriter)
+                }
+
+                ProcessTerminatedListener.attach(processHandler)
+                return processHandler
             }
+        }
+    }
 
+    private class InputWriterProcessAdapter(
+        private val parentState: CommandLineState,
+        private val processHandler: OSProcessHandler,
+        private val inputText: String,
+        private val inputClose: Boolean,
+    ) : ProcessAdapter() {
+        private val writer: OutputStream = processHandler.process.outputStream
+
+        override fun startNotified(event: ProcessEvent) {
+            val contentDescriptor = RunContentManager.getInstance(parentState.environment.project)
+                .findContentDescriptor(parentState.environment.executor, processHandler)
+            if (contentDescriptor != null && contentDescriptor.executionConsole is ConsoleView) {
+                (contentDescriptor.executionConsole as ConsoleView).print(
+                    inputText,
+                    ConsoleViewContentType.LOG_INFO_OUTPUT
+                )
+            }
             try {
-                writer.write(inputText.getBytes());
-                writer.flush();
+                writer.write(inputText.toByteArray())
+                writer.flush()
                 if (inputClose) {
-                    writer.close();
+                    writer.close()
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
 
-        @Override
-        public void processTerminated(@NotNull ProcessEvent event) {
-            if (!inputClose)
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        override fun processTerminated(event: ProcessEvent) {
+            if (!inputClose) try {
+                writer.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
     }
 }

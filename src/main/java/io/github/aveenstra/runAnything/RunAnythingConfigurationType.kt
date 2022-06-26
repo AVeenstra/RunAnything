@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021 A Veenstra
+ *    Copyright 2022 A Veenstra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,50 +13,39 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package io.github.aveenstra.runAnything
 
-package io.github.aveenstra.run_anything;
-
-import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.ConfigurationType;
-import com.intellij.icons.AllIcons;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
+import com.intellij.execution.configurations.ConfigurationType
+import org.jetbrains.annotations.Nls
+import com.intellij.icons.AllIcons
+import com.intellij.execution.configurations.ConfigurationFactory
+import javax.swing.Icon
 
 /**
  * This class represents the configuration type of the plugin.
  */
-public class RunAnythingConfigurationType implements ConfigurationType {
-
-    @Override
-    public @NotNull @Nls(capitalization = Nls.Capitalization.Title) String getDisplayName() {
-        return "Run Command";
+class RunAnythingConfigurationType : ConfigurationType {
+    override fun getDisplayName(): @Nls(capitalization = Nls.Capitalization.Title) String {
+        return "Run Command"
     }
 
-    @Override
-    public @Nls(capitalization = Nls.Capitalization.Sentence) String getConfigurationTypeDescription() {
-        return "Run any system command.";
+    override fun getConfigurationTypeDescription(): @Nls(capitalization = Nls.Capitalization.Sentence) String {
+        return "Run any system command."
     }
 
-    @Override
-    public Icon getIcon() {
-        return AllIcons.Actions.Run_anything;
+    override fun getIcon(): Icon {
+        return AllIcons.Actions.Run_anything
     }
 
-    @Override
-    public @NotNull String getId() {
-        return "RUN_ANYTHING_CONFIGURATION";
+    override fun getId(): String {
+        return "RUN_ANYTHING_CONFIGURATION"
     }
 
-    @Override
-    public ConfigurationFactory[] getConfigurationFactories() {
-        return new ConfigurationFactory[]{new RunAnythingConfigurationFactory(this)};
+    override fun getConfigurationFactories(): Array<ConfigurationFactory> {
+        return arrayOf(RunAnythingConfigurationFactory(this))
     }
 
-    @Override
-    public @Nullable String getHelpTopic() {
-        return null;
+    override fun getHelpTopic(): String? {
+        return null
     }
 }

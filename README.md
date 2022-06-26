@@ -32,4 +32,10 @@ Use gradle to build the plugin:
 ./gradlew assemble
 ```
 
-The output should be in `build/distributions`.
+The output should be in `./build/distributions`.
+
+[io.github.aveenstra.runAnything.RunAnythingConfigurationType](src/main/java/io/github/aveenstra/runAnything/RunAnythingConfigurationType.kt) provides the toplevel definition of the run configuration.
+
+Options of the run configuration are represented by [io.github.aveenstra.runAnything.RunAnythingConfigurationOptions](src/main/java/io/github/aveenstra/runAnything/RunAnythingConfigurationOptions.kt).
+
+The UI is provided by [io.github.aveenstra.runAnything.RunAnythingSettingsEditor](src/main/java/io/github/aveenstra/runAnything/RunAnythingSettingsEditor.kt) together with its [form](src/main/java/io/github/aveenstra/runAnything/RunAnythingSettingsEditor.form).

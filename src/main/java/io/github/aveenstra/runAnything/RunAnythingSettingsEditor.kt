@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021 A Veenstra
+ *    Copyright 2022 A Veenstra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,89 +13,85 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package io.github.aveenstra.runAnything
 
-package io.github.aveenstra.run_anything;
+import com.intellij.execution.configuration.EnvironmentVariablesComponent
+import com.intellij.ide.macro.MacrosDialog
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.options.ConfigurationException
+import com.intellij.openapi.options.SettingsEditor
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.components.fields.ExpandableTextField
+import com.intellij.ui.components.fields.ExtendableTextField
+import javax.swing.JComponent
+import javax.swing.JPanel
 
-import com.intellij.execution.configuration.EnvironmentVariablesComponent;
-import com.intellij.ide.macro.MacrosDialog;
-import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBTextArea;
-import com.intellij.ui.components.fields.ExpandableTextField;
-import com.intellij.ui.components.fields.ExtendableTextField;
-import org.jetbrains.annotations.NotNull;
+class RunAnythingSettingsEditor : SettingsEditor<RunAnythingConfiguration>() {
+    private val topPanel: JPanel? = null
+    private var commandField: TextFieldWithBrowseButton? = null
+    private var argumentsField: ExpandableTextField? = null
+    private val environmentField: EnvironmentVariablesComponent? = null
+    private var workingDirectoryField: TextFieldWithBrowseButton? = null
+    private var enableInputCheckBox: JBCheckBox? = null
+    private val closeInputCheckBox: JBCheckBox? = null
+    private var inputTextComponent: JBTextArea? = null
 
-import javax.swing.*;
+    override fun resetEditorFrom(s: RunAnythingConfiguration) {
+        val options = s.options
 
+        commandField!!.text = options.command.orEmpty()
+        argumentsField!!.text = options.arguments.orEmpty()
+        environmentField!!.envData = options.environmentVariablesData
+        workingDirectoryField!!.text = options.workingDirectory.orEmpty()
+        enableInputCheckBox!!.isSelected = options.inputEnabled
+        closeInputCheckBox!!.isSelected = options.inputClose
+        inputTextComponent!!.text = options.inputText.orEmpty()
 
-public class RunAnythingSettingsEditor extends SettingsEditor<RunAnythingConfiguration> {
-    private JPanel topPanel;
-    private TextFieldWithBrowseButton commandField;
-    private ExpandableTextField argumentsField;
-    private EnvironmentVariablesComponent environmentField;
-    private TextFieldWithBrowseButton workingDirectoryField;
-    private JBCheckBox enableInputCheckBox;
-    private JBCheckBox closeInputCheckBox;
-    private JBTextArea inputTextComponent;
-
-    @Override
-    protected void resetEditorFrom(@NotNull RunAnythingConfiguration s) {
-        var options = s.getOptions();
-        commandField.setText(options.getCommand());
-        argumentsField.setText(options.getArguments());
-        environmentField.setEnvData(options.getEnvironmentVariablesData());
-        workingDirectoryField.setText(options.getWorkingDirectory());
-        var inputEnabled = options.getInputEnabled();
-        enableInputCheckBox.setSelected(inputEnabled);
-        closeInputCheckBox.setSelected(options.getInputClose());
-        inputTextComponent.setText(options.getInputText());
-        setInputFieldsEnabled(inputEnabled);
+        setInputFieldsEnabled(options.inputEnabled)
     }
 
-    @Override
-    protected void applyEditorTo(@NotNull RunAnythingConfiguration s) throws ConfigurationException {
-        var options = s.getOptions();
-        options.setCommand(commandField.getText());
-        options.setArguments(argumentsField.getText());
-        options.setEnvironmentVariablesData(environmentField.getEnvData());
-        options.setWorkingDirectory(workingDirectoryField.getText());
-        options.setInputEnabled(enableInputCheckBox.isSelected());
-        options.setInputClose(closeInputCheckBox.isSelected());
-        options.setInputText(inputTextComponent.getText());
+    @Throws(ConfigurationException::class)
+    override fun applyEditorTo(s: RunAnythingConfiguration) {
+        val options = s.options
+        options.command = commandField!!.text
+        options.arguments = argumentsField!!.text
+        options.environmentVariablesData = environmentField!!.envData
+        options.workingDirectory = workingDirectoryField!!.text
+        options.inputEnabled = enableInputCheckBox!!.isSelected
+        options.inputClose = closeInputCheckBox!!.isSelected
+        options.inputText = inputTextComponent!!.text
     }
 
-    @Override
-    protected @NotNull JComponent createEditor() {
-        return topPanel;
+    override fun createEditor(): JComponent {
+        return topPanel!!
     }
 
-    private void setInputFieldsEnabled(boolean enabled) {
-        closeInputCheckBox.setEnabled(enabled);
-        inputTextComponent.setEnabled(enabled);
+    private fun setInputFieldsEnabled(enabled: Boolean) {
+        closeInputCheckBox!!.isEnabled = enabled
+        inputTextComponent!!.isEnabled = enabled
     }
 
-    private void createUIComponents() {
-        var command_field_filter = new FileChooserDescriptor(true, false, false, true, false, false);
-        commandField = new TextFieldWithBrowseButton();
-        commandField.addBrowseFolderListener("Select a Program", "", null, command_field_filter);
-        MacrosDialog.addTextFieldExtension((ExtendableTextField) commandField.getTextField());
-
-        argumentsField = new ExpandableTextField();
-        MacrosDialog.addTextFieldExtension(argumentsField);
-
-        var working_directory_field_filter = new FileChooserDescriptor(false, true, false, false, false, false);
-        workingDirectoryField = new TextFieldWithBrowseButton();
-        workingDirectoryField.addBrowseFolderListener("Select a Directory", "", null, working_directory_field_filter);
-        MacrosDialog.addTextFieldExtension((ExtendableTextField) workingDirectoryField.getTextField());
-
-        enableInputCheckBox = new JBCheckBox();
-        enableInputCheckBox.addActionListener(actionEvent -> setInputFieldsEnabled(enableInputCheckBox.isSelected()));
-
-        inputTextComponent = new JBTextArea(5, 80);
-        inputTextComponent.setAutoscrolls(true);
-        inputTextComponent.setLineWrap(true);
+    private fun createUIComponents() {
+        val commandFieldFilter = FileChooserDescriptor(true, false, false, true, false, false)
+        commandField = TextFieldWithBrowseButton()
+        commandField!!.addBrowseFolderListener("Select a Program", "", null, commandFieldFilter)
+        MacrosDialog.addTextFieldExtension((commandField!!.textField as ExtendableTextField))
+        argumentsField = ExpandableTextField()
+        MacrosDialog.addTextFieldExtension(argumentsField!!)
+        val workingDirectoryFieldFilter = FileChooserDescriptor(false, true, false, false, false, false)
+        workingDirectoryField = TextFieldWithBrowseButton()
+        workingDirectoryField!!.addBrowseFolderListener("Select a Directory", "", null, workingDirectoryFieldFilter)
+        MacrosDialog.addTextFieldExtension((workingDirectoryField!!.textField as ExtendableTextField))
+        enableInputCheckBox = JBCheckBox()
+        enableInputCheckBox!!.addActionListener {
+            setInputFieldsEnabled(
+                enableInputCheckBox!!.isSelected
+            )
+        }
+        inputTextComponent = JBTextArea(5, 80)
+        inputTextComponent!!.autoscrolls = true
+        inputTextComponent!!.lineWrap = true
     }
 }

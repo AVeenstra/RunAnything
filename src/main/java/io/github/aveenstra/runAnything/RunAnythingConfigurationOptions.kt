@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021 A Veenstra
+ *    Copyright 2022 A Veenstra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,138 +13,79 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package io.github.aveenstra.runAnything
 
-package io.github.aveenstra.run_anything;
+import com.intellij.execution.configuration.EnvironmentVariablesData
+import com.intellij.execution.configurations.RunConfigurationOptions
+import com.intellij.execution.configurations.RuntimeConfigurationException
+import com.intellij.openapi.options.ConfigurationException
+import com.intellij.util.xmlb.annotations.Attribute
 
-import com.intellij.execution.configuration.EnvironmentVariablesData;
-import com.intellij.execution.configurations.RunConfigurationOptions;
-import com.intellij.execution.configurations.RuntimeConfigurationException;
-import com.intellij.openapi.components.StoredProperty;
-import com.intellij.openapi.options.ConfigurationException;
-import org.jetbrains.annotations.NotNull;
+class RunAnythingConfigurationOptions : RunConfigurationOptions() {
 
-import java.util.HashMap;
-import java.util.Map;
+    @get:Attribute
+    internal var command by string("")
 
-public class RunAnythingConfigurationOptions extends RunConfigurationOptions {
-    private final StoredProperty<String> command = string("").provideDelegate(this, "command");
-    private final StoredProperty<String> arguments = string("").provideDelegate(this, "arguments");
-    private final StoredProperty<String> workingDirectory = string("").provideDelegate(this, "workingDirectory");
-    private final StoredProperty<Map<String, String>> environmentVariables = map();
-    private final StoredProperty<Boolean> isPassParentEnvs = property(true).provideDelegate(this, "isPassParentEnvs");
-    private final StoredProperty<Boolean> inputEnabled = property(false).provideDelegate(this, "inputEnabled");
-    private final StoredProperty<String> inputText = string("").provideDelegate(this, "inputText");
-    private final StoredProperty<Boolean> inputClose = property(true).provideDelegate(this, "inputClose");
+    @get:Attribute
+    internal var arguments by string("")
 
-    public RunAnythingConfigurationOptions() {
-        environmentVariables.setName("environmentVariables");
-    }
+    @get:Attribute
+    internal var workingDirectory by string("")
 
-    public @NotNull String getCommand() {
-        var result = command.getValue(this);
-        return result == null ? "" : result;
-    }
+    @get:Attribute
+    internal var environmentVariables by map<String, String>()
 
-    public void validateCommand(@NotNull String command) throws ConfigurationException {
-        if (command.isEmpty()) throw new ConfigurationException("No command given");
-    }
+    @get:Attribute
+    internal var isPassParentEnvs by property(true)
 
-    public void setCommand(@NotNull String newCommand) throws ConfigurationException {
-        validateCommand(newCommand);
-        command.setValue(this, newCommand);
-    }
+    @get:Attribute
+    internal var inputEnabled by property(false)
 
-    public @NotNull String getArguments() {
-        var result = arguments.getValue(this);
-        return result == null ? "" : result;
-    }
+    @get:Attribute
+    internal var inputText by string("")
 
-    public void setArguments(@NotNull String newArguments) {
-        arguments.setValue(this, newArguments);
-    }
+    @get:Attribute
+    internal var inputClose by property(true)
 
-    public @NotNull EnvironmentVariablesData getEnvironmentVariablesData() {
-        var env = environmentVariables.getValue(this);
-        if (env == null) return EnvironmentVariablesData.DEFAULT;
-        else return EnvironmentVariablesData.create(env, isPassParentEnvs.getValue(this));
-    }
-
-    public void validateEnvironmentVariables(@NotNull Map<String, String> newEnvironment) throws ConfigurationException {
-        for (var key : newEnvironment.keySet()) {
-            if (key.isEmpty()) throw new ConfigurationException("Empty environment keys are not allowed");
+    @Throws(ConfigurationException::class)
+    fun validateCommand(command: String?) {
+        if (command == null || command.isEmpty()) {
+            throw ConfigurationException("No command given")
         }
     }
 
-    public void setEnvironmentVariablesData(@NotNull EnvironmentVariablesData environmentVariablesData) throws ConfigurationException {
-        var newEnvironmentVariables = environmentVariablesData.getEnvs();
-        validateEnvironmentVariables(newEnvironmentVariables);
-        environmentVariables.setValue(this, newEnvironmentVariables);
-        isPassParentEnvs.setValue(this, environmentVariablesData.isPassParentEnvs());
+    @set:Throws(ConfigurationException::class)
+    var environmentVariablesData: EnvironmentVariablesData
+        get() {
+            return EnvironmentVariablesData.create(
+                environmentVariables,
+                isPassParentEnvs
+            )
+        }
+        set(environmentVariablesData) {
+            val newEnvironmentVariables = environmentVariablesData.envs
+            validateEnvironmentVariables(newEnvironmentVariables)
+            environmentVariables = newEnvironmentVariables
+            isPassParentEnvs = environmentVariablesData.isPassParentEnvs
+        }
+
+    @Throws(ConfigurationException::class)
+    fun validateEnvironmentVariables(newEnvironment: Map<String, String>) {
+        for (key in newEnvironment.keys) {
+            if (key.isEmpty()) throw ConfigurationException("Empty environment keys are not allowed")
+        }
     }
 
-    public @NotNull Map<String, String> getEnvironmentVariables() {
-        var result = environmentVariables.getValue(this);
-        return result == null ? new HashMap<>() : result;
-    }
-
-    @SuppressWarnings("unused")
-    public void setEnvironmentVariables(@NotNull Map<String, String> newEnvironment) throws ConfigurationException {
-        validateEnvironmentVariables(newEnvironment);
-        environmentVariables.setValue(this, newEnvironment);
-    }
-
-    public boolean getIsPassParentEnvs() {
-        return isPassParentEnvs.getValue(this);
-    }
-
-    @SuppressWarnings("unused")
-    public void setIsPassParentEnvs(boolean newIsPassParentEnvs) {
-        isPassParentEnvs.setValue(this, newIsPassParentEnvs);
-    }
-
-    public @NotNull String getWorkingDirectory() {
-        var result = workingDirectory.getValue(this);
-        return result == null ? "" : result;
-    }
-
-    public void setWorkingDirectory(@NotNull String newWorkingDirectory) {
-        workingDirectory.setValue(this, newWorkingDirectory);
-    }
-
-    public boolean getInputEnabled() {
-        return inputEnabled.getValue(this);
-    }
-
-    public void setInputEnabled(boolean enabled) {
-        inputEnabled.setValue(this, enabled);
-    }
-
-    public @NotNull String getInputText() {
-        var result = inputText.getValue(this);
-        return result == null ? "" : result;
-    }
-
-    public void setInputText(@NotNull String newInputText) {
-        inputText.setValue(this, newInputText);
-    }
-
-    public boolean getInputClose() {
-        return inputClose.getValue(this);
-    }
-
-    public void setInputClose(boolean close) {
-        inputClose.setValue(this, close);
-    }
-
-    public void validate_all() throws RuntimeConfigurationException {
+    @Throws(RuntimeConfigurationException::class)
+    fun validateAll() {
         try {
-            validateCommand(getCommand());
-            validateEnvironmentVariables(getEnvironmentVariables());
-        } catch (ConfigurationException e) {
-            var new_e = new RuntimeConfigurationException(e.getMessage(), e.getTitle());
-            new_e.setOriginator(e.getOriginator());
-            new_e.setStackTrace(e.getStackTrace());
-            throw new_e;
+            validateCommand(command)
+            validateEnvironmentVariables(environmentVariables)
+        } catch (e: ConfigurationException) {
+            val newE = RuntimeConfigurationException(e.message, e.title)
+            newE.originator = e.originator
+            newE.stackTrace = e.stackTrace
+            throw newE
         }
     }
 }

@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>io.github.aveenstra.run-anything</id>
+    <id>io.github.aveenstra.runAnything</id>
     <name>RunAnything</name>
     <vendor>AVeenstra</vendor>
 
@@ -15,7 +15,7 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="io.github.aveenstra.run_anything.RunAnythingConfigurationType"/>
+        <configurationType implementation="io.github.aveenstra.runAnything.RunAnythingConfigurationType"/>
     </extensions>
 
     <actions/>
