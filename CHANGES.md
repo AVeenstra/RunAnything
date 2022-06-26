@@ -1,6 +1,4 @@
 <dl>
-<dt>1.10</dt>
-<dd>Testing workflow</dd>
 <dt>1.8</dt>
 <dd>Support new version of Intellij</dd>
 <dt>1.7</dt>

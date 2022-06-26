@@ -32,13 +32,13 @@ jobs:
           JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
           VERSION: ${{ inputs.VERSION }}
           CHANGE_NOTES: ${{ inputs.CHANGE_NOTES }}
-        run: ./gradlew build -x publishPlugin
+        run: ./gradlew build publishPlugin
 
       - name: Push the CHANGES.md
         run: |
           git config --global core.pager 'cat'
-          git config --global user.name 'GitHubActions'
-          git config --global user.email 'GitHubActions@users.noreply.github.com'
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
           git diff
           git add CHANGES.md
           git commit -m "Update CHANGES.md for v${{ inputs.VERSION }}"
@@ -49,8 +49,6 @@ jobs:
         uses: actions/github-script@v6.1.0
         with:
           script: |
-            console.log('context =', context)
-            
             const fs = require('fs');
             
             const owner = context.repo.owner;
@@ -62,26 +60,15 @@ jobs:
               body: '${{ inputs.CHANGE_NOTES }}'
             });
             
-            console.log('releaseResponse =', releaseResponse);
-            
             const name = 'RunAnything-${{ inputs.VERSION }}.zip';
             const filename = './build/distributions/' + name;
-            
-            console.log('filename =', filename);
-            
             const contentLength = fs.statSync(filename).size;
-            
             const headers = { 'content-type': 'application/zip', 'content-length': contentLength };
-            
-            console.log('headers =', headers);
-            
             const data = fs.readFileSync(filename);
             
-            const assetResponse = await github.rest.repos.uploadReleaseAsset({
+            await github.rest.repos.uploadReleaseAsset({
               headers,
               owner, repo,
               release_id: releaseResponse.data.id,
               name, data
             });
-            
-            console.log('assetResponse =', assetResponse);
