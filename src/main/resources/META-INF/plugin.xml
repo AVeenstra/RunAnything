@@ -1,5 +1,5 @@
-<idea-plugin>
-    <id>io.github.aveenstra.runAnything</id>
+<idea-plugin url="https://plugins.jetbrains.com/plugin/16128-runanything/">
+    <id>io.github.aveenstra.run-anything</id>
     <name>RunAnything</name>
     <vendor>AVeenstra</vendor>
 
