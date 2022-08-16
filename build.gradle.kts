@@ -1,7 +1,9 @@
-// See https://github.com/JetBrains/gradle-intellij-plugin/
 plugins {
-    kotlin("jvm") version "1.7.0"
-    id("org.jetbrains.intellij") version "1.6.0"
+    // See https://github.com/JetBrains/kotlin/
+    kotlin("jvm") version "1.7.10"
+
+    // See https://github.com/JetBrains/gradle-intellij-plugin/
+    id("org.jetbrains.intellij") version "1.8.0"
 }
 
 group = "io.github.aveenstra"
@@ -16,8 +18,6 @@ intellij {
     version.set("LATEST-EAP-SNAPSHOT")
     updateSinceUntilBuild.set(false)
 }
-
-
 
 val changeFile = File("CHANGES.md")
 val changesLines: ListProperty<String> = project.objects.listProperty()
