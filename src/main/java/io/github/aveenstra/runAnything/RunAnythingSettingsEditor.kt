@@ -29,13 +29,13 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 class RunAnythingSettingsEditor : SettingsEditor<RunAnythingConfiguration>() {
-    private val topPanel: JPanel? = null
+    private var topPanel: JPanel? = null
     private var commandField: TextFieldWithBrowseButton? = null
     private var argumentsField: ExpandableTextField? = null
-    private val environmentField: EnvironmentVariablesComponent? = null
+    private var environmentField: EnvironmentVariablesComponent? = null
     private var workingDirectoryField: TextFieldWithBrowseButton? = null
     private var enableInputCheckBox: JBCheckBox? = null
-    private val closeInputCheckBox: JBCheckBox? = null
+    private var closeInputCheckBox: JBCheckBox? = null
     private var inputTextComponent: JBTextArea? = null
 
     override fun resetEditorFrom(s: RunAnythingConfiguration) {
