@@ -1,4 +1,6 @@
 <dl>
+<dt>1.11</dt>
+<dd>Support new version of Intellij</dd>
 <dt>1.8</dt>
 <dd>Support new version of Intellij</dd>
 <dt>1.7</dt>
