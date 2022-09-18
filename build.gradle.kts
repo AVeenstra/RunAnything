@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
 
     // See https://github.com/JetBrains/gradle-intellij-plugin/
-    id("org.jetbrains.intellij") version "1.8.0"
+    id("org.jetbrains.intellij") version "1.9.0"
 }
 
 group = "io.github.aveenstra"
@@ -14,8 +14,18 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+}
+
+java {
+    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
 intellij {
-    version.set("LATEST-EAP-SNAPSHOT")
+    version.set("2020.1")
     updateSinceUntilBuild.set(false)
 }
 
@@ -25,8 +35,8 @@ changesLines.set(changeFile.readLines())
 val changesText = changesLines.map { it.joinToString("\n", postfix = "\n") }
 val patchPluginDepends = mutableListOf<TaskProvider<Task>>()
 
-if (!versionOverride.isNullOrEmpty()) {
-    patchPluginDepends.add(tasks.register("patchChanges") {
+if (!versionOverride.isNullOrBlank()) {
+    val patchChanges = tasks.register("patchChanges") {
         val changeNotes = System.getenv()["CHANGE_NOTES"]
 
         inputs.property("VERSION", versionOverride)
@@ -50,20 +60,18 @@ if (!versionOverride.isNullOrEmpty()) {
 
             changeFile.writeText(changesText.get())
         }
-    })
+    }
+    patchPluginDepends.add(patchChanges)
+}
+
+tasks.buildSearchableOptions {
+    enabled = false
 }
 
 tasks.patchPluginXml {
     dependsOn.addAll(patchPluginDepends)
     changeNotes.set(changesText)
     sinceBuild.set("201.3803.71")
-}
-
-tasks.listProductsReleases {
-    doLast {
-        val output = outputFile.get().asFile.readLines()
-        outputFile.get().asFile.writeText("${output.first()}\n${output.last()}\n")
-    }
 }
 
 tasks.publishPlugin {

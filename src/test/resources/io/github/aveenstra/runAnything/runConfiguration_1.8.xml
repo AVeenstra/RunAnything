@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="name" type="RUN_ANYTHING_CONFIGURATION" factoryName="RunAnythingFactory">
+        <option name="arguments" value="arguments"/>
+        <option name="command" value="command"/>
+        <option name="inputEnabled" value="true"/>
+        <option name="inputText" value="input"/>
+        <option name="workingDirectory" value="working directory"/>
+        <method v="2"/>
+    </configuration>
+</component>

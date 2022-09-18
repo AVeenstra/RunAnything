@@ -17,24 +17,14 @@ package io.github.aveenstra.runAnything
 
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationType
-import com.intellij.execution.configurations.RunConfiguration
-import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
 
 class RunAnythingConfigurationFactory(type: ConfigurationType) : ConfigurationFactory(type) {
-    override fun createTemplateConfiguration(project: Project): RunConfiguration {
-        return RunAnythingConfiguration(project, this, "Run command")
-    }
+    override fun createTemplateConfiguration(project: Project) = RunAnythingConfiguration(project, this, "Run command")
 
-    override fun getName(): String {
-        return "Run anything configuration factory"
-    }
+    override fun getName() = "Run anything configuration factory"
 
-    override fun getId(): String {
-        return "RunAnythingFactory"
-    }
+    override fun getId() = "RunAnythingFactory"
 
-    override fun getOptionsClass(): Class<out BaseState?> {
-        return RunAnythingConfigurationOptions::class.java
-    }
+    override fun getOptionsClass() = RunAnythingConfigurationOptions::class.java
 }

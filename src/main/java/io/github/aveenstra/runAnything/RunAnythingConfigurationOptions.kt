@@ -19,61 +19,60 @@ import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.configurations.RunConfigurationOptions
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.openapi.options.ConfigurationException
-import com.intellij.util.xmlb.annotations.Attribute
+import com.intellij.util.xmlb.annotations.OptionTag
+import com.jetbrains.rd.util.put
 
 class RunAnythingConfigurationOptions : RunConfigurationOptions() {
 
-    @get:Attribute
-    internal var command by string("")
+    @get:OptionTag
+    var command by string("")
 
-    @get:Attribute
-    internal var arguments by string("")
+    @get:OptionTag
+    var arguments by string("")
 
-    @get:Attribute
-    internal var workingDirectory by string("")
+    @get:OptionTag
+    var workingDirectory by string("")
 
-    @get:Attribute
-    internal var environmentVariables by map<String, String>()
+    @get:OptionTag
+    var environmentVariables by map<String, String>()
 
-    @get:Attribute
-    internal var isPassParentEnvs by property(true)
+    @get:OptionTag
+    var isPassParentEnvs by property(true)
 
-    @get:Attribute
-    internal var inputEnabled by property(false)
+    @get:OptionTag
+    var inputEnabled by property(false)
 
-    @get:Attribute
-    internal var inputText by string("")
+    @get:OptionTag
+    var inputText by string("")
 
-    @get:Attribute
-    internal var inputClose by property(true)
+    @get:OptionTag
+    var inputClose by property(true)
 
     @Throws(ConfigurationException::class)
     fun validateCommand(command: String?) {
-        if (command == null || command.isEmpty()) {
+        if (command.isNullOrBlank()) {
             throw ConfigurationException("No command given")
         }
     }
 
     @set:Throws(ConfigurationException::class)
     var environmentVariablesData: EnvironmentVariablesData
-        get() {
-            return EnvironmentVariablesData.create(
-                environmentVariables,
-                isPassParentEnvs
-            )
-        }
+        get() = EnvironmentVariablesData.create(environmentVariables, isPassParentEnvs)
         set(environmentVariablesData) {
-            val newEnvironmentVariables = environmentVariablesData.envs
-            validateEnvironmentVariables(newEnvironmentVariables)
-            environmentVariables = newEnvironmentVariables
+            environmentVariables = validateEnvironmentVariables(environmentVariablesData.envs)
             isPassParentEnvs = environmentVariablesData.isPassParentEnvs
         }
 
     @Throws(ConfigurationException::class)
-    fun validateEnvironmentVariables(newEnvironment: Map<String, String>) {
-        for (key in newEnvironment.keys) {
-            if (key.isEmpty()) throw ConfigurationException("Empty environment keys are not allowed")
+    fun validateEnvironmentVariables(newEnvironment: Map<String, String>): MutableMap<String, String> {
+        val result = HashMap<String, String>(newEnvironment.size)
+        for (entry in newEnvironment.entries) {
+            if (entry.key.isBlank()) {
+                throw ConfigurationException("Empty environment keys are not allowed")
+            }
+            result.put(entry)
         }
+        return result
     }
 
     @Throws(RuntimeConfigurationException::class)

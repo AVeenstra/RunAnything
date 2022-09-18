@@ -39,7 +39,7 @@ class RunAnythingSettingsEditor : SettingsEditor<RunAnythingConfiguration>() {
     private var inputTextComponent: JBTextArea? = null
 
     override fun resetEditorFrom(s: RunAnythingConfiguration) {
-        val options = s.options
+        val options = s.getRunAnythingOptions()
 
         commandField!!.text = options.command.orEmpty()
         argumentsField!!.text = options.arguments.orEmpty()
@@ -54,7 +54,7 @@ class RunAnythingSettingsEditor : SettingsEditor<RunAnythingConfiguration>() {
 
     @Throws(ConfigurationException::class)
     override fun applyEditorTo(s: RunAnythingConfiguration) {
-        val options = s.options
+        val options = s.getRunAnythingOptions()
         options.command = commandField!!.text
         options.arguments = argumentsField!!.text
         options.environmentVariablesData = environmentField!!.envData
