@@ -1,4 +1,6 @@
 <dl>
+<dt>2.0</dt>
+<dd>Refactoring and bugfixes</dd>
 <dt>1.11</dt>
 <dd>Support new version of Intellij</dd>
 <dt>1.8</dt>
